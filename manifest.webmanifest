@@ -1,0 +1,17 @@
+{
+  "name": "HidroVerde · Agroinicio",
+  "short_name": "HidroVerde",
+  "description": "Calcula tu solución nutritiva hidropónica y controla la conductividad y el pH.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f7ef",
+  "theme_color": "#0b6123",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

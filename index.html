@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HidroVerde</title>
+<meta name="description" content="HidroVerde de Agroinicio: calcula tu solución nutritiva hidropónica y controla la conductividad y el pH. Gratis y funciona sin internet.">
+<meta name="theme-color" content="#0b6123">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HidroVerde">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#inicio" aria-label="Inicio">
+      <img src="assets/hoja.png" alt="">
+      <div>
+        <div class="brand-name"><b>HIDRO</b><span>VERDE</span></div>
+        <div class="brand-sub">por Agroinicio</div>
+      </div>
+    </a>
+    <button class="icon-btn" id="themeBtn" aria-label="Cambiar tema" title="Cambiar tema"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+  </div>
+</header>
+
+<main>
+  <!-- ============ INICIO ============ -->
+  <section class="view" id="view-inicio">
+    <div class="hero card">
+      <h1>Tu cultivo sin tierra, bajo control</h1>
+      <p>Calcula cuánta solución nutritiva echar y lleva el registro de tus siembras. Todo queda en tu teléfono.</p>
+      <a class="btn primary" href="#calcular">Nueva siembra</a>
+    </div>
+    <h2 class="sec-title">Mis siembras</h2>
+    <div id="listaSiembras"></div>
+    <div class="card respaldo">
+      <h2>Copia de seguridad</h2>
+      <p class="nota">Tus siembras viven solo en este teléfono. Guarda una copia por si cambias de teléfono o borras el navegador.</p>
+      <div class="row2">
+        <button class="btn ghost" id="btnExportar" type="button">Exportar copia</button>
+        <label class="btn ghost" for="inImportar">Importar copia</label>
+      </div>
+      <input type="file" id="inImportar" accept="application/json,.json" class="visually-hidden">
+    </div>
+  </section>
+
+  <!-- ============ DETALLE DE SIEMBRA ============ -->
+  <section class="view" id="view-siembra">
+    <a class="volver" href="#inicio">← Mis siembras</a>
+    <div class="card" id="siembraCab"></div>
+
+    <form id="formMed" class="card" novalidate>
+      <h2>Registrar medición</h2>
+      <label class="field" id="campoCE">Conductividad, CE (mS/cm)
+        <input id="mCE" type="text" inputmode="decimal" placeholder="Ej: 1,2" autocomplete="off">
+      </label>
+      <label class="check"><input type="checkbox" id="mSinCE"> No tengo medidor de CE</label>
+
+      <p class="field-lbl">pH</p>
+      <div class="segmento" role="radiogroup" aria-label="Cómo mides el pH">
+        <button type="button" role="radio" aria-checked="true" data-ph="medidor">Medidor</button>
+        <button type="button" role="radio" aria-checked="false" data-ph="tira">Tira de pH</button>
+      </div>
+      <label class="field" id="campoPH">Valor de pH
+        <input id="mPH" type="text" inputmode="decimal" placeholder="Ej: 5,8" autocomplete="off">
+      </label>
+      <div id="campoTira" class="hidden">
+        <p class="nota">Compara el color de la tira con la tabla del envase y toca el valor más parecido.</p>
+        <div class="chips" id="chipsTira" role="radiogroup" aria-label="Valor de la tira"></div>
+      </div>
+
+      <div class="row2">
+        <label class="field">Temperatura del agua (°C)
+          <input id="mT" type="text" inputmode="decimal" placeholder="Opcional">
+        </label>
+        <label class="field">Nota
+          <input id="mNota" type="text" maxlength="200" placeholder="Opcional">
+        </label>
+      </div>
+      <p class="error hidden" id="errMed" role="alert"></p>
+      <button class="btn primary block" type="submit">Evaluar y guardar</button>
+    </form>
+
+    <div id="resMed" class="card hidden" aria-live="polite"></div>
+
+    <h2 class="sec-title">Historial</h2>
+    <div id="historial"></div>
+  </section>
+
+  <!-- ============ CALCULAR ============ -->
+  <section class="view" id="view-calcular">
+    <form id="formCalc" class="card" novalidate>
+      <h1 id="calcTitulo">Calcular solución</h1>
+
+      <fieldset>
+        <legend>1. ¿Qué vas a cultivar?</legend>
+        <div class="chips" id="chipsCultivo" role="radiogroup" aria-label="Cultivo"></div>
+        <label class="field" id="campoEtapa">Etapa
+          <select id="selEtapa"></select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>2. ¿Cuánta agua?</legend>
+        <label class="field">Litros de agua en el depósito
+          <input id="inLitros" type="text" inputmode="decimal" placeholder="Ej: 1 para un frasco, 10 para un balde" autocomplete="off">
+        </label>
+        <label class="field">Sistema
+          <select id="selSistema"></select>
+        </label>
+        <div class="ficha" id="fichaSistema" aria-live="polite"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>3. ¿Qué nutriente usas?</legend>
+        <div class="segmento" role="radiogroup" aria-label="Tipo de nutriente">
+          <button type="button" role="radio" aria-checked="true" data-modo="ab">Concentrado A+B</button>
+          <button type="button" role="radio" aria-checked="false" data-modo="sales">Sales individuales</button>
+        </div>
+
+        <div id="modoSales" class="hidden">
+          <label class="field">Receta
+            <select id="selReceta"></select>
+          </label>
+          <div id="recetaPropia" class="hidden">
+            <p class="nota">Escribe la receta en ppm (mg/L) de cada elemento. Deja en 0 lo que no uses.</p>
+            <div class="grid-ppm" id="gridPpm"></div>
+          </div>
+          <label class="check"><input type="checkbox" id="chkAjustar" checked> Ajustar la receta a la CE de mi cultivo y etapa</label>
+          <p class="nota">Desmárcalo si quieres la receta tal cual, al 100 %.</p>
+        </div>
+
+        <div id="modoAB">
+        <label class="field">Producto A+B
+          <select id="selProducto"></select>
+        </label>
+        <p class="nota" id="notaProducto"></p>
+
+        <div id="productoPropio" class="hidden">
+          <label class="field">Nombre (opcional)
+            <input id="ppNombre" type="text" maxlength="60" placeholder="Ej: Sales de la ferretería">
+          </label>
+          <label class="field">Unidad
+            <select id="ppUnidad"><option value="ml">ml (líquido)</option><option value="g">g (polvo)</option></select>
+          </label>
+          <div class="row2">
+            <label class="field">Parte A por litro
+              <input id="ppA" type="text" inputmode="decimal" placeholder="Ej: 2,5">
+            </label>
+            <label class="field">Parte B por litro
+              <input id="ppB" type="text" inputmode="decimal" placeholder="Ej: 2,5">
+            </label>
+          </div>
+          <details class="ayuda">
+            <summary>Mi etiqueta dice "rinde X litros"</summary>
+            <div class="row2">
+              <label class="field">Cantidad del envase
+                <input id="envCant" type="text" inputmode="decimal" placeholder="Ej: 1000">
+              </label>
+              <label class="field">Litros que rinde
+                <input id="envLitros" type="text" inputmode="decimal" placeholder="Ej: 200">
+              </label>
+            </div>
+            <button type="button" class="btn ghost small" id="btnEnvase">Calcular dosis por litro</button>
+          </details>
+          <label class="field">CE a dosis completa (mS/cm)
+            <input id="ppCE" type="text" inputmode="decimal" value="1,8">
+          </label>
+          <p class="nota">Si no sabes la CE de tu producto, deja 1,8 y mide la solución ya preparada.</p>
+        </div>
+        </div>
+      </fieldset>
+
+      <p class="error hidden" id="errCalc" role="alert"></p>
+      <button class="btn primary block" type="submit">Calcular</button>
+    </form>
+
+    <div id="resultado" class="card resultado hidden" aria-live="polite"></div>
+  </section>
+
+  <!-- ============ APRENDE ============ -->
+  <section class="view" id="view-aprende">
+    <div class="card prose">
+      <h1>Lo básico, sin enredos</h1>
+      <h2>¿Qué es la solución nutritiva?</h2>
+      <p>En hidroponía la planta no come de la tierra: come del agua. La solución nutritiva es agua con las sales minerales que necesita. Se vende en dos partes, <b>A</b> y <b>B</b>, porque juntas y concentradas se cortan.</p>
+      <p class="aviso">Nunca mezcles A y B puras. Echa primero A en el agua, revuelve, y después B.</p>
+      <h2>¿Qué es la conductividad (CE)?</h2>
+      <p>Mide cuántas sales hay disueltas en el agua, en mS/cm. Muy baja: la planta pasa hambre. Muy alta: se le queman las raíces y las hojas. Cada cultivo y cada etapa tiene su rango.</p>
+      <h2>¿Qué es el pH?</h2>
+      <p>Indica si el agua es ácida o alcalina. Aunque haya nutrientes, con el pH fuera de rango la planta no los puede absorber. La mayoría de las hojas quiere un pH cerca de 5,8.</p>
+      <h2>¿Necesito medidores?</h2>
+      <p>Lo ideal es tener un medidor de CE y uno de pH; son baratos. Si todavía no tienes, puedes partir con tiras de pH y respetar la dosis que te da HidroVerde.</p>
+      <h2>¿Concentrado A+B o sales individuales?</h2>
+      <p>El concentrado A+B viene listo: es lo más simple para partir. Con <b>sales individuales</b> (nitrato de calcio, nitrato de potasio, sulfato de magnesio…) armas tu propia receta, sale más barato en volumen y controlas cada nutriente, pero hay que pesar con cuidado.</p>
+      <p class="aviso">Si preparas soluciones concentradas, el nitrato de calcio va en un tanque (A) y los sulfatos y fosfatos en otro (B). Juntos y concentrados forman un precipitado que la planta no puede absorber.</p>
+      <h2>Seguridad</h2>
+      <p>Usa guantes al manipular sales y reguladores de pH, guárdalos lejos de niños y mascotas, y sigue siempre la etiqueta del producto. HidroVerde orienta, pero no reemplaza la etiqueta.</p>
+    </div>
+    <div class="card prose">
+      <h1>Sistemas hidropónicos</h1>
+      <p>Del más fácil al más exigente. Si estás empezando, parte con Kratky.</p>
+      <div id="listaSistemas"></div>
+    </div>
+    <div class="card reto">
+      <h2>¿Quieres que un agrónomo te acompañe?</h2>
+      <p>Reto <b>"Tu primera lechuga sin tierra en 30 días"</b>, guiado por el ingeniero agrónomo de Agroinicio.</p>
+      <span class="btn ghost disabled" aria-disabled="true">Próximamente</span>
+    </div>
+    <p class="pie">HidroVerde es gratis, no pide datos personales y guarda todo solo en tu teléfono. <a href="https://www.agroinicio.com" target="_blank" rel="noopener">agroinicio.com</a></p>
+  </section>
+</main>
+
+<nav class="bottomnav" aria-label="Secciones">
+  <a href="#inicio" data-nav="inicio"><span aria-hidden="true">🏠</span>Inicio</a>
+  <a href="#calcular" data-nav="calcular"><span aria-hidden="true">🧪</span>Calcular</a>
+  <a href="#aprende" data-nav="aprende"><span aria-hidden="true">📘</span>Aprende</a>
+</nav>
+
+<div class="toast hidden" id="toast" role="status"></div>
+
+<script src="js/kb.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/store.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
